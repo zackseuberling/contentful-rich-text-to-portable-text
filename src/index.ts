@@ -7,7 +7,7 @@ import {
   PTVirtualList,
   isPTBlockNode,
   PTListItem,
-  PTReference
+  PTReference,
 } from './ptTypes'
 import {
   CFNode,
@@ -24,7 +24,7 @@ import {
   CFEmbeddedEntryBlockNode,
   CFEmbeddedEntryInlineNode,
   CFAssetHyperlinkNode,
-  CFEntryHyperlinkNode
+  CFEntryHyperlinkNode,
 } from './cfTypes'
 
 type KeyGenerator = (node: CFNode | CFContainerNode, options: TransformOptions) => string
@@ -63,7 +63,7 @@ const defaultTransformers: {[key: string]: Function} = {
   'asset-hyperlink': assetOrEntryLink,
   'embedded-asset-block': reference,
   'embedded-entry-block': reference,
-  'embedded-entry-inline': reference
+  'embedded-entry-inline': reference,
 }
 
 function skip(): PTNode[] {
@@ -77,13 +77,13 @@ function list(
 ): PTNode[] {
   const depth = options.depth || 1
   const type = node.nodeType === 'ordered-list' ? 'number' : 'bullet'
-  const children = node.content.map(item => listItem(item, options, {type}))
+  const children = node.content.map((item) => listItem(item, options, {type}))
   const listNode: PTVirtualList = {
     _type: 'virtualList',
     _key: options.generateKey(node, options),
     type,
     level: depth,
-    children: children.reduce((acc, group) => [...acc, ...group], [])
+    children: children.reduce((acc, group) => [...acc, ...group], []),
   }
 
   return !parent || parent.nodeType === 'document' ? flattenList(listNode) : [listNode]
@@ -97,7 +97,7 @@ function listItem(
   const nodes: PTNode[] = []
   for (let i = 0; i < node.content.length; i++) {
     const child = node.content[i]
-    toPortableText(child, options, node).forEach(ptNode => {
+    toPortableText(child, options, node).forEach((ptNode) => {
       if (isPTBlockNode(ptNode)) {
         nodes.push({...ptNode, level: options.depth, listItem: parent.type} as PTListItem)
       } else {
@@ -126,8 +126,8 @@ function parseLinkNode(
 
   const nodes = node.content
     .filter(isCFTextNode)
-    .map(child => convertSpan(child, options))
-    .map(span => ({...span, marks: span.marks.concat(linkKey)}))
+    .map((child) => convertSpan(child, options))
+    .map((span) => ({...span, marks: span.marks.concat(linkKey)}))
 
   return {nodes, linkKey}
 }
@@ -154,8 +154,8 @@ function reference(
     return [
       {
         _key: options.generateKey(node, options),
-        ...options.referenceResolver(node, options)
-      }
+        ...options.referenceResolver(node, options),
+      },
     ]
   }
 
@@ -163,8 +163,8 @@ function reference(
     {
       _type: 'reference',
       _key: options.generateKey(node, options),
-      _ref: node.data.target.sys.id
-    }
+      _ref: node.data.target.sys.id,
+    },
   ]
 }
 
@@ -192,8 +192,8 @@ function blockquote(node: CFBlockQuoteNode, options: TransformOptions): PTBlock[
       markDefs,
       // We only want the childrens children (they are blocks, but we need their
       // paragraphs etc).
-      children: flatten(children.map(c => c.children))
-    }
+      children: flatten(children.map((c) => c.children)),
+    },
   ]
 }
 
@@ -212,8 +212,8 @@ function convertSpan(node: CFTextNode, options: TransformOptions): PTSpan {
   return {
     _type: 'span',
     _key: options.generateKey(node, options),
-    marks: node.marks.map(mark => markMapping[mark.type] || mark.type),
-    text: node.value
+    marks: node.marks.map((mark) => markMapping[mark.type] || mark.type),
+    text: node.value,
   }
 }
 
@@ -249,12 +249,14 @@ function convertBlock(node: CFContainerNode, options: TransformOptions): PTBlock
     _key: options.generateKey(node, options),
     style: 'normal',
     markDefs: markDefinitions,
-    children
+    children,
   }
 }
 
 function flattenList(list: PTVirtualList): PTNode[] {
-  return list.children.map(child => (isVirtualList(child) ? flattenList(child) : child)) as PTNode[]
+  return list.children.map((child) =>
+    isVirtualList(child) ? flattenList(child) : child
+  ) as PTNode[]
 }
 
 function isVirtualList(node: PTNode): node is PTVirtualList {
@@ -289,7 +291,7 @@ export function toPortableText(
 ): PTNode[] {
   const transformers: {[key: string]: Function | undefined} = {
     ...defaultTransformers,
-    ...(options ? options.transformers : {})
+    ...(options ? options.transformers : {}),
   }
 
   const opts: TransformOptions = {generateKey, depth: 0, ...options, transformers}
