@@ -197,7 +197,7 @@ function blockquote(node: CFBlockQuoteNode, options: TransformOptions): PTBlock[
   ]
 }
 
-function block(node: CFContainerNode, options: TransformOptions): PTBlock[] {
+export function block(node: CFContainerNode, options: TransformOptions): PTBlock[] {
   return [convertBlock(node, options)]
 }
 
